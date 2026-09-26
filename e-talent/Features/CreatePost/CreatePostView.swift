@@ -115,14 +115,23 @@ public struct CreatePostView: View {
                                 // Preview Container or Selector
                                 if let selectedImage {
                                     // Live image preview
+                                    let imgRatio: Double = selectedImage.size.height > 0 ? max(0.8, min(1.91, Double(selectedImage.size.width / selectedImage.size.height))) : 1.0
+                                    
                                     ZStack(alignment: .bottomTrailing) {
-                                        Image(uiImage: selectedImage)
-                                            .resizable()
-                                            .scaledToFill()
+                                        Color.clear
+                                            .aspectRatio(imgRatio, contentMode: .fit)
                                             .frame(maxWidth: .infinity)
-                                            .aspectRatio(0.8, contentMode: .fit)
-                                            .clipped()
-                                            .cornerRadius(ETRadius.media)
+                                            .frame(maxHeight: 280)
+                                            .overlay(
+                                                GeometryReader { proxy in
+                                                    Image(uiImage: selectedImage)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: proxy.size.width, height: proxy.size.height)
+                                                        .clipped()
+                                                }
+                                            )
+                                            .clipShape(RoundedRectangle(cornerRadius: ETRadius.media))
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: ETRadius.media)
                                                     .stroke(ETColors.primaryOrange.opacity(0.4), lineWidth: 1.5)
@@ -146,6 +155,8 @@ public struct CreatePostView: View {
                                             .padding(ETSpacing.small)
                                         }
                                     }
+                                    .frame(maxWidth: .infinity)
+                                    .clipped()
                                 } else if let videoName = selectedVideoFilename {
                                     // Video Selected Preview Card
                                     VStack(spacing: ETSpacing.small) {
@@ -158,27 +169,33 @@ public struct CreatePostView: View {
                                                         endPoint: .bottomTrailing
                                                     )
                                                 )
-                                                .aspectRatio(1.77, contentMode: .fit)
+                                                .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                                                .frame(maxWidth: .infinity)
+                                                .frame(maxHeight: 220)
                                                 .overlay(
                                                     VStack(spacing: ETSpacing.xSmall) {
                                                         Image(systemName: "play.circle.fill")
-                                                            .font(.system(size: 48))
+                                                            .font(.system(size: 44))
                                                             .foregroundColor(ETColors.primaryOrange)
                                                         
                                                         Text(videoName)
                                                             .font(ETTypography.subheadlineBold)
                                                             .foregroundColor(ETColors.pureWhite)
+                                                            .lineLimit(1)
                                                         
                                                         Text("Highlight prêt pour mise en ligne")
                                                             .font(ETTypography.caption)
                                                             .foregroundColor(ETColors.secondaryText)
                                                     }
+                                                    .padding(.horizontal, ETSpacing.small)
                                                 )
                                                 .overlay(
                                                     RoundedRectangle(cornerRadius: ETRadius.media)
                                                         .stroke(ETColors.primaryOrange.opacity(0.4), lineWidth: 1.5)
                                                 )
                                         }
+                                        .frame(maxWidth: .infinity)
+                                        .clipped()
                                         
                                         PhotosPicker(
                                             selection: $selectedPickerItem,
@@ -204,19 +221,21 @@ public struct CreatePostView: View {
                                         ZStack {
                                             RoundedRectangle(cornerRadius: ETRadius.media)
                                                 .fill(ETColors.darkSurface)
-                                                .aspectRatio(selectedMediaType == .video ? 1.77 : 0.8, contentMode: .fit)
+                                                .aspectRatio(selectedMediaType == .video ? 16.0 / 9.0 : 4.0 / 3.0, contentMode: .fit)
+                                                .frame(maxWidth: .infinity)
+                                                .frame(maxHeight: 200)
                                                 .overlay(
                                                     VStack(spacing: ETSpacing.small) {
                                                         if isLoadingMedia {
                                                             ProgressView()
                                                                 .tint(ETColors.primaryOrange)
-                                                                .scaleEffect(1.3)
+                                                                .scaleEffect(1.2)
                                                             Text("Chargement du média...")
                                                                 .font(ETTypography.caption)
                                                                 .foregroundColor(ETColors.secondaryText)
                                                         } else {
                                                             Image(systemName: selectedMediaType == .video ? "video.badge.plus" : "photo.badge.plus")
-                                                                .font(.system(size: 38))
+                                                                .font(.system(size: 34))
                                                                 .foregroundColor(ETColors.primaryOrange)
                                                             
                                                             Text(selectedMediaType == .video ? "Sélectionner une vidéo highlight" : "Sélectionner une photo")
@@ -228,6 +247,7 @@ public struct CreatePostView: View {
                                                                 .foregroundColor(ETColors.secondaryText)
                                                         }
                                                     }
+                                                    .padding(.horizontal, ETSpacing.small)
                                                 )
                                                 .overlay(
                                                     RoundedRectangle(cornerRadius: ETRadius.media)
@@ -237,6 +257,8 @@ public struct CreatePostView: View {
                                                         .foregroundColor(ETColors.primaryOrange.opacity(0.6))
                                                 )
                                         }
+                                        .frame(maxWidth: .infinity)
+                                        .clipped()
                                     }
                                     .buttonStyle(.plain)
                                 }

@@ -90,12 +90,20 @@ public struct ETPostCard: View {
             if post.mediaType != .none {
                 ZStack(alignment: .bottomLeading) {
                     if let data = post.imageData, let uiImage = UIImage(data: data) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFill()
+                        Color.clear
                             .aspectRatio(post.mediaAspectRatio, contentMode: .fit)
-                            .clipped()
-                            .cornerRadius(ETRadius.media)
+                            .frame(maxWidth: .infinity)
+                            .frame(maxHeight: 420)
+                            .overlay(
+                                GeometryReader { proxy in
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: proxy.size.width, height: proxy.size.height)
+                                        .clipped()
+                                }
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: ETRadius.media))
                             .overlay(
                                 RoundedRectangle(cornerRadius: ETRadius.media)
                                     .stroke(ETColors.borderGray.opacity(0.15), lineWidth: 1)
@@ -110,6 +118,8 @@ public struct ETPostCard: View {
                                 )
                             )
                             .aspectRatio(post.mediaAspectRatio, contentMode: .fit)
+                            .frame(maxWidth: .infinity)
+                            .frame(maxHeight: 420)
                             .overlay(
                                 VStack(spacing: ETSpacing.small) {
                                     Image(systemName: post.mediaType == .video ? "play.circle.fill" : "basketball.fill")
@@ -145,6 +155,8 @@ public struct ETPostCard: View {
                         .padding(ETSpacing.small)
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .clipped()
             }
             
             // MARK: - Actions (Like, Comment, Bookmark)

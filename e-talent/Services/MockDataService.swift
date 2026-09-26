@@ -63,8 +63,20 @@ public final class MockDataService {
         content: String,
         mediaType: PostMediaType,
         caption: String? = nil,
-        imageData: Data? = nil
+        imageData: Data? = nil,
+        aspectRatio: Double? = nil
     ) {
+        var calculatedRatio: Double = mediaType == .video ? 1.77 : 1.0
+        if let explicitRatio = aspectRatio {
+            calculatedRatio = explicitRatio
+        } else if let imageData, let uiImage = UIImage(data: imageData), uiImage.size.height > 0 {
+            let naturalRatio = Double(uiImage.size.width / uiImage.size.height)
+            // Clamp entre 0.8 (portrait 4:5) et 1.91 (paysage) pour un rendu visuel optimal
+            calculatedRatio = max(0.8, min(1.91, naturalRatio))
+        } else if mediaType == .photo {
+            calculatedRatio = 1.0 // Format carré harmonieux par défaut
+        }
+
         let newPost = Post(
             id: UUID().uuidString,
             authorId: "current_user",
@@ -77,7 +89,7 @@ public final class MockDataService {
             timeAgo: "À l'instant",
             content: content,
             mediaType: mediaType,
-            mediaAspectRatio: mediaType == .video ? 1.77 : 0.8,
+            mediaAspectRatio: calculatedRatio,
             mediaCaption: caption ?? (mediaType == .video ? "Session Highlight" : "Photo du jour"),
             likesCount: 0,
             commentsCount: 0,
