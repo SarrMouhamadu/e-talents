@@ -38,6 +38,7 @@ public struct PlayerProfileView: View {
                     VStack(spacing: ETSpacing.small) {
                         ETAvatar(
                             name: player.name,
+                            imageName: player.avatarUrl,
                             size: .xLarge,
                             isVerified: player.isVerified,
                             isAvailable: isCurrentUser ? isAvailableForRecruiting : player.isAvailable,

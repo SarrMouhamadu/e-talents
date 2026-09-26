@@ -36,6 +36,7 @@ public enum ETAvatarSize {
 
 public struct ETAvatar: View {
     private let name: String
+    private let imageName: String?
     private let size: ETAvatarSize
     private let isVerified: Bool
     private let isAvailable: Bool
@@ -43,12 +44,14 @@ public struct ETAvatar: View {
     
     public init(
         name: String,
+        imageName: String? = nil,
         size: ETAvatarSize = .medium,
         isVerified: Bool = false,
         isAvailable: Bool = false,
         showAvailability: Bool = false
     ) {
         self.name = name
+        self.imageName = imageName
         self.size = size
         self.isVerified = isVerified
         self.isAvailable = isAvailable
@@ -67,24 +70,36 @@ public struct ETAvatar: View {
     
     public var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [ETColors.darkSurface, ETColors.pureBlack],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+            if let imageName, let uiImage = UIImage(named: imageName) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.dimension, height: size.dimension)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(ETColors.primaryOrange.opacity(0.4), lineWidth: 1.5)
                     )
-                )
-                .frame(width: size.dimension, height: size.dimension)
-                .overlay(
-                    Circle()
-                        .stroke(ETColors.primaryOrange.opacity(0.35), lineWidth: 1.5)
-                )
-                .overlay(
-                    Text(initials)
-                        .font(size.font)
-                        .foregroundColor(ETColors.primaryOrange)
-                )
+            } else {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [ETColors.darkSurface, ETColors.pureBlack],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: size.dimension, height: size.dimension)
+                    .overlay(
+                        Circle()
+                            .stroke(ETColors.primaryOrange.opacity(0.35), lineWidth: 1.5)
+                    )
+                    .overlay(
+                        Text(initials)
+                            .font(size.font)
+                            .foregroundColor(ETColors.primaryOrange)
+                    )
+            }
             
             // Badge Vérifié ou Disponibilité
             if isVerified {

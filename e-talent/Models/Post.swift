@@ -54,6 +54,8 @@ public struct Post: Identifiable, Hashable, Codable {
     public var isBookmarked: Bool
     public var comments: [PostComment]
     public var imageData: Data?
+    public var authorAvatarUrl: String?
+    public var imageName: String?
     
     public init(
         id: String = UUID().uuidString,
@@ -77,7 +79,9 @@ public struct Post: Identifiable, Hashable, Codable {
         isLiked: Bool = false,
         isBookmarked: Bool = false,
         comments: [PostComment] = [],
-        imageData: Data? = nil
+        imageData: Data? = nil,
+        authorAvatarUrl: String? = nil,
+        imageName: String? = nil
     ) {
         self.id = id
         self.authorId = authorId
@@ -101,5 +105,7 @@ public struct Post: Identifiable, Hashable, Codable {
         self.isBookmarked = isBookmarked
         self.comments = comments
         self.imageData = imageData
+        self.authorAvatarUrl = authorAvatarUrl
+        self.imageName = imageName
     }
 }

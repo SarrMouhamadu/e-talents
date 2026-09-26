@@ -27,7 +27,7 @@ public struct ETPostCard: View {
             HStack(spacing: ETSpacing.small) {
                 Button(action: { onAuthorTapped?() }) {
                     HStack(spacing: ETSpacing.small) {
-                        ETAvatar(name: post.authorName, size: .small, isVerified: post.isAuthorVerified)
+                        ETAvatar(name: post.authorName, imageName: post.authorAvatarUrl, size: .small, isVerified: post.isAuthorVerified)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             HStack(spacing: ETSpacing.xxSmall) {
@@ -126,6 +126,25 @@ public struct ETPostCard: View {
             if post.mediaType != .none {
                 ZStack(alignment: .bottomLeading) {
                     if let data = post.imageData, let uiImage = UIImage(data: data) {
+                        Color.clear
+                            .aspectRatio(post.mediaAspectRatio, contentMode: .fit)
+                            .frame(maxWidth: .infinity)
+                            .frame(maxHeight: 420)
+                            .overlay(
+                                GeometryReader { proxy in
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: proxy.size.width, height: proxy.size.height)
+                                        .clipped()
+                                }
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: ETRadius.media))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: ETRadius.media)
+                                    .stroke(ETColors.borderGray.opacity(0.15), lineWidth: 1)
+                            )
+                    } else if let mediaName = post.imageName, let uiImage = UIImage(named: mediaName) {
                         Color.clear
                             .aspectRatio(post.mediaAspectRatio, contentMode: .fit)
                             .frame(maxWidth: .infinity)

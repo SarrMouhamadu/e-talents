@@ -15,6 +15,7 @@ public struct ETPlayerCard: View {
                 // Avatar avec indicateur
                 ETAvatar(
                     name: player.name,
+                    imageName: player.avatarUrl,
                     size: .medium,
                     isVerified: player.isVerified,
                     isAvailable: player.isAvailable,

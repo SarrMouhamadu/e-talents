@@ -179,6 +179,7 @@ public struct HomeView: View {
                             VStack(spacing: 6) {
                                 ETAvatar(
                                     name: player.name,
+                                    imageName: player.avatarUrl,
                                     size: .medium,
                                     isVerified: player.isVerified,
                                     isAvailable: player.isAvailable,
