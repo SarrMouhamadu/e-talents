@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 public struct CreatePostView: View {
+    @AppStorage("userAccountType") private var userAccountType: String = "player"
     @State private var postContent: String = ""
     @State private var selectedMediaType: PostMediaType = .photo
     @State private var mediaCaption: String = "Workout Session • Marius Ndiaye"
@@ -25,18 +26,57 @@ public struct CreatePostView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: ETSpacing.standard) {
-                        // Auteur info
+                        // Auteur info (Club ou Joueur)
                         HStack(spacing: ETSpacing.small) {
-                            ETAvatar(name: "Mamadou Sarr", size: .medium, isVerified: true)
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Mamadou Sarr")
-                                    .font(ETTypography.subheadlineBold)
-                                    .foregroundColor(ETColors.pureWhite)
+                            if userAccountType == "club", let club = MockDataService.shared.currentClub {
+                                if let data = club.logoData, let img = UIImage(data: data) {
+                                    Image(uiImage: img)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 44, height: 44)
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(ETColors.primaryOrange, lineWidth: 1.5))
+                                } else {
+                                    ETAvatar(name: club.name, size: .medium, isVerified: club.isVerified)
+                                }
                                 
-                                Text("Ailier fort • Thiès")
-                                    .font(ETTypography.caption)
-                                    .foregroundColor(ETColors.secondaryText)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    HStack(spacing: ETSpacing.xxSmall) {
+                                        Text(club.name)
+                                            .font(ETTypography.subheadlineBold)
+                                            .foregroundColor(ETColors.pureWhite)
+                                        
+                                        Text("CLUB")
+                                            .font(.system(size: 9, weight: .bold))
+                                            .foregroundColor(ETColors.pureBlack)
+                                            .padding(.horizontal, 5)
+                                            .padding(.vertical, 2)
+                                            .background(ETColors.primaryOrange)
+                                            .cornerRadius(4)
+                                    }
+                                    
+                                    if let rep = club.representativeName {
+                                        Text("Publié par \(rep) (\(club.representativeRole ?? "Représentant"))")
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                    } else {
+                                        Text("\(club.division) • \(club.city)")
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                    }
+                                }
+                            } else {
+                                ETAvatar(name: "Mamadou Sarr", size: .medium, isVerified: true)
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Mamadou Sarr")
+                                        .font(ETTypography.subheadlineBold)
+                                        .foregroundColor(ETColors.pureWhite)
+                                    
+                                    Text("Ailier fort • Thiès")
+                                        .font(ETTypography.caption)
+                                        .foregroundColor(ETColors.secondaryText)
+                                }
                             }
                         }
                         
@@ -384,12 +424,37 @@ public struct CreatePostView: View {
         isSubmitting = true
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
-            MockDataService.shared.addPost(
-                content: postContent,
-                mediaType: selectedMediaType,
-                caption: selectedVideoFilename ?? (selectedMediaType == .video ? "Session Highlight 2026" : "Photo de performance"),
-                imageData: selectedImageData
-            )
+            
+            if userAccountType == "club", let club = MockDataService.shared.currentClub {
+                MockDataService.shared.addPost(
+                    content: postContent,
+                    mediaType: selectedMediaType,
+                    caption: selectedVideoFilename ?? (selectedMediaType == .video ? "Highlight Détection • \(club.name)" : "Actualité Officielle • \(club.name)"),
+                    imageData: selectedImageData,
+                    authorId: club.id,
+                    authorName: club.name,
+                    authorHandle: "@" + club.name.lowercased().replacingOccurrences(of: " ", with: "."),
+                    authorRole: "Club",
+                    authorClub: club.name,
+                    authorPosition: club.division,
+                    representativeName: club.representativeName,
+                    representativeRole: club.representativeRole
+                )
+            } else {
+                MockDataService.shared.addPost(
+                    content: postContent,
+                    mediaType: selectedMediaType,
+                    caption: selectedVideoFilename ?? (selectedMediaType == .video ? "Session Highlight 2026" : "Photo de performance"),
+                    imageData: selectedImageData,
+                    authorId: "player_2",
+                    authorName: "Mamadou Sarr",
+                    authorHandle: "@mamadou.sarr",
+                    authorRole: "Joueur",
+                    authorClub: nil,
+                    authorPosition: "Ailier fort"
+                )
+            }
+            
             isSubmitting = false
             isSuccess = true
             try? await Task.sleep(nanoseconds: 400_000_000)

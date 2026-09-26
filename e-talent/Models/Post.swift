@@ -39,6 +39,8 @@ public struct Post: Identifiable, Hashable, Codable {
     public var authorRole: String // "Joueur" ou "Club"
     public var authorClub: String?
     public var authorPosition: String?
+    public var representativeName: String?
+    public var representativeRole: String?
     public var isAuthorVerified: Bool
     public var timeAgo: String
     public var content: String
@@ -61,6 +63,8 @@ public struct Post: Identifiable, Hashable, Codable {
         authorRole: String = "Joueur",
         authorClub: String? = nil,
         authorPosition: String? = nil,
+        representativeName: String? = nil,
+        representativeRole: String? = nil,
         isAuthorVerified: Bool = false,
         timeAgo: String,
         content: String,
@@ -82,6 +86,8 @@ public struct Post: Identifiable, Hashable, Codable {
         self.authorRole = authorRole
         self.authorClub = authorClub
         self.authorPosition = authorPosition
+        self.representativeName = representativeName
+        self.representativeRole = representativeRole
         self.isAuthorVerified = isAuthorVerified
         self.timeAgo = timeAgo
         self.content = content

@@ -23,7 +23,7 @@ public struct ETPostCard: View {
     
     public var body: some View {
         VStack(alignment: .leading, spacing: ETSpacing.small) {
-            // MARK: - En-tête (Auteur, Rôle, Club, Temps)
+            // MARK: - En-tête (Auteur, Rôle, Club, Représentant, Temps)
             HStack(spacing: ETSpacing.small) {
                 Button(action: { onAuthorTapped?() }) {
                     HStack(spacing: ETSpacing.small) {
@@ -40,17 +40,53 @@ public struct ETPostCard: View {
                                         .font(.system(size: 12))
                                         .foregroundColor(ETColors.primaryOrange)
                                 }
+                                
+                                if post.authorRole == "Club" {
+                                    Text("CLUB")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundColor(ETColors.pureBlack)
+                                        .padding(.horizontal, 5)
+                                        .padding(.vertical, 2)
+                                        .background(ETColors.primaryOrange)
+                                        .cornerRadius(4)
+                                }
                             }
                             
                             HStack(spacing: ETSpacing.xxSmall) {
-                                if let club = post.authorClub {
-                                    Text(club)
-                                        .font(ETTypography.caption)
-                                        .foregroundColor(ETColors.primaryOrange)
-                                    Text("•")
-                                        .font(ETTypography.caption)
-                                        .foregroundColor(ETColors.secondaryText)
+                                if post.authorRole == "Club" {
+                                    if let rep = post.representativeName {
+                                        Text("Par \(rep)")
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                        Text("•")
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                    } else if let pos = post.authorPosition {
+                                        Text(pos)
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                        Text("•")
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                    }
+                                } else {
+                                    if let club = post.authorClub {
+                                        Text(club)
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.primaryOrange)
+                                        Text("•")
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                    } else if let pos = post.authorPosition {
+                                        Text(pos)
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                        Text("•")
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                    }
                                 }
+                                
                                 Text(post.timeAgo)
                                     .font(ETTypography.caption)
                                     .foregroundColor(ETColors.secondaryText)
@@ -162,13 +198,19 @@ public struct ETPostCard: View {
             // MARK: - Actions (Like, Comment, Bookmark)
             HStack(spacing: ETSpacing.large) {
                 // Like Button
-                Button(action: { onLikeTapped?() }) {
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        onLikeTapped?()
+                    }
+                }) {
                     HStack(spacing: ETSpacing.xxSmall) {
                         Image(systemName: post.isLiked ? "heart.fill" : "heart")
                             .font(.system(size: 18))
                             .foregroundColor(post.isLiked ? ETColors.primaryOrange : ETColors.secondaryText)
+                            .scaleEffect(post.isLiked ? 1.12 : 1.0)
                         Text("\(post.likesCount)")
                             .font(ETTypography.caption)
+                            .fontWeight(post.isLiked ? .bold : .regular)
                             .foregroundColor(post.isLiked ? ETColors.primaryOrange : ETColors.secondaryText)
                     }
                     .frame(minHeight: 44)

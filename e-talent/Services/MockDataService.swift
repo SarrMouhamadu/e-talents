@@ -30,10 +30,24 @@ public final class MockDataService {
         isLoadingFeed = false
     }
     
+    // Compte des likes par l'utilisateur connecté
+    public var likedPostIds: Set<String> = ["post_1"]
+    
+    public func isLiked(postId: String) -> Bool {
+        likedPostIds.contains(postId)
+    }
+    
     public func toggleLike(for postId: String) {
         if let index = posts.firstIndex(where: { $0.id == postId }) {
-            posts[index].isLiked.toggle()
-            posts[index].likesCount += posts[index].isLiked ? 1 : -1
+            if likedPostIds.contains(postId) {
+                likedPostIds.remove(postId)
+                posts[index].isLiked = false
+                posts[index].likesCount = max(0, posts[index].likesCount - 1)
+            } else {
+                likedPostIds.insert(postId)
+                posts[index].isLiked = true
+                posts[index].likesCount += 1
+            }
         }
     }
     
@@ -65,7 +79,15 @@ public final class MockDataService {
         mediaType: PostMediaType,
         caption: String? = nil,
         imageData: Data? = nil,
-        aspectRatio: Double? = nil
+        aspectRatio: Double? = nil,
+        authorId: String = "current_user",
+        authorName: String = "Mamadou Sarr",
+        authorHandle: String = "@mamadou.sarr",
+        authorRole: String = "Joueur",
+        authorClub: String? = nil,
+        authorPosition: String? = "Ailier fort",
+        representativeName: String? = nil,
+        representativeRole: String? = nil
     ) {
         var calculatedRatio: Double = mediaType == .video ? 1.77 : 1.0
         if let explicitRatio = aspectRatio {
@@ -80,12 +102,14 @@ public final class MockDataService {
 
         let newPost = Post(
             id: UUID().uuidString,
-            authorId: "current_user",
-            authorName: "Mamadou Sarr",
-            authorHandle: "@mamadou.sarr",
-            authorRole: "Joueur",
-            authorClub: nil,
-            authorPosition: "Ailier fort",
+            authorId: authorId,
+            authorName: authorName,
+            authorHandle: authorHandle,
+            authorRole: authorRole,
+            authorClub: authorClub,
+            authorPosition: authorPosition,
+            representativeName: representativeName,
+            representativeRole: representativeRole,
             isAuthorVerified: true,
             timeAgo: "À l'instant",
             content: content,

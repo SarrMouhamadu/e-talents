@@ -3,6 +3,7 @@ import SwiftUI
 public struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var selectedPlayer: Player?
+    @State private var selectedClub: Club?
     @State private var selectedPostForComments: Post?
     @State private var showNotifications: Bool = false
     
@@ -61,8 +62,14 @@ public struct HomeView: View {
                                             viewModel.toggleBookmark(postId: post.id)
                                         },
                                         onAuthorTapped: {
-                                            if let player = MockData.samplePlayers.first(where: { $0.id == post.authorId || $0.name == post.authorName }) {
-                                                selectedPlayer = player
+                                            if post.authorRole == "Club" {
+                                                if let club = MockDataService.shared.clubs.first(where: { $0.id == post.authorId || $0.name == post.authorName }) {
+                                                    selectedClub = club
+                                                }
+                                            } else {
+                                                if let player = MockDataService.shared.players.first(where: { $0.id == post.authorId || $0.name == post.authorName }) {
+                                                    selectedPlayer = player
+                                                }
                                             }
                                         }
                                     )
@@ -81,6 +88,11 @@ public struct HomeView: View {
             .sheet(item: $selectedPlayer) { player in
                 NavigationStack {
                     PlayerProfileView(player: player)
+                }
+            }
+            .sheet(item: $selectedClub) { club in
+                NavigationStack {
+                    ClubProfileView(club: club)
                 }
             }
             .sheet(item: $selectedPostForComments) { post in
