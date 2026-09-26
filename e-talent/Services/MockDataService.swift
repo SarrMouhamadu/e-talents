@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Observation
 
 @Observable
@@ -11,6 +12,10 @@ public final class MockDataService {
     public var conversations: [Conversation] = MockData.sampleConversations
     public var notifications: [NotificationItem] = MockData.sampleNotifications
     
+    // Suivis (Following)
+    public var followedPlayerIds: Set<String> = []
+    public var followedClubIds: Set<String> = []
+    
     public var isLoadingFeed: Bool = false
     public var isLoadingDiscover: Bool = false
     
@@ -21,7 +26,6 @@ public final class MockDataService {
         isLoadingFeed = true
         // Simule une latence réseau réaliste
         try? await Task.sleep(nanoseconds: 600_000_000)
-        self.posts = MockData.samplePosts
         isLoadingFeed = false
     }
     
@@ -38,7 +42,29 @@ public final class MockDataService {
         }
     }
     
-    public func addPost(content: String, mediaType: PostMediaType) {
+    public func addComment(to postId: String, text: String, authorName: String = "Mamadou Sarr") {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        
+        if let index = posts.firstIndex(where: { $0.id == postId }) {
+            let newComment = PostComment(
+                authorName: authorName,
+                authorRole: "Joueur",
+                text: trimmed,
+                timeAgo: "À l'instant",
+                isVerified: true
+            )
+            posts[index].comments.insert(newComment, at: 0)
+            posts[index].commentsCount += 1
+        }
+    }
+    
+    public func addPost(
+        content: String,
+        mediaType: PostMediaType,
+        caption: String? = nil,
+        imageData: Data? = nil
+    ) {
         let newPost = Post(
             id: UUID().uuidString,
             authorId: "current_user",
@@ -52,13 +78,90 @@ public final class MockDataService {
             content: content,
             mediaType: mediaType,
             mediaAspectRatio: mediaType == .video ? 1.77 : 0.8,
-            mediaCaption: "Session E-Talent",
+            mediaCaption: caption ?? (mediaType == .video ? "Session Highlight" : "Photo du jour"),
             likesCount: 0,
             commentsCount: 0,
             isLiked: false,
-            isBookmarked: false
+            isBookmarked: false,
+            comments: [],
+            imageData: imageData
         )
         posts.insert(newPost, at: 0)
+    }
+    
+    // MARK: - Suivre / Ne plus suivre
+    public func isFollowing(playerId: String) -> Bool {
+        followedPlayerIds.contains(playerId)
+    }
+    
+    @discardableResult
+    public func toggleFollow(playerId: String) -> Bool {
+        if followedPlayerIds.contains(playerId) {
+            followedPlayerIds.remove(playerId)
+            if let index = players.firstIndex(where: { $0.id == playerId }) {
+                players[index].followersCount = max(0, players[index].followersCount - 1)
+            }
+            return false
+        } else {
+            followedPlayerIds.insert(playerId)
+            if let index = players.firstIndex(where: { $0.id == playerId }) {
+                players[index].followersCount += 1
+            }
+            return true
+        }
+    }
+    
+    public func isFollowingClub(clubId: String) -> Bool {
+        followedClubIds.contains(clubId)
+    }
+    
+    @discardableResult
+    public func toggleFollowClub(clubId: String) -> Bool {
+        if followedClubIds.contains(clubId) {
+            followedClubIds.remove(clubId)
+            if let index = clubs.firstIndex(where: { $0.id == clubId }) {
+                clubs[index].followersCount = max(0, clubs[index].followersCount - 1)
+            }
+            return false
+        } else {
+            followedClubIds.insert(clubId)
+            if let index = clubs.firstIndex(where: { $0.id == clubId }) {
+                clubs[index].followersCount += 1
+            }
+            return true
+        }
+    }
+    
+    // MARK: - Conversations / Messagerie
+    public func getOrCreateConversation(
+        for participantName: String,
+        role: String = "Joueur",
+        club: String? = nil,
+        isVerified: Bool = false
+    ) -> Conversation {
+        if let existing = conversations.first(where: { $0.participantName.localizedCaseInsensitiveContains(participantName) }) {
+            return existing
+        }
+        
+        let newConv = Conversation(
+            id: UUID().uuidString,
+            participantName: participantName,
+            participantRole: role,
+            participantClub: club,
+            isVerified: isVerified,
+            lastMessage: "Conversation démarrée",
+            timeAgo: "À l'instant",
+            unreadCount: 0
+        )
+        conversations.insert(newConv, at: 0)
+        return newConv
+    }
+    
+    // MARK: - Mise à jour Joueur / Profil
+    public func updatePlayer(_ updated: Player) {
+        if let index = players.firstIndex(where: { $0.id == updated.id }) {
+            players[index] = updated
+        }
     }
     
     // MARK: - Discover Filter

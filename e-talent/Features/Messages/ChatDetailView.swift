@@ -7,25 +7,29 @@ public struct ChatDetailView: View {
             senderId: "coach",
             text: "Bonjour ! J'ai vu tes vidéos de highlights contre l'AS Douanes.",
             timestamp: "14:28",
-            isFromCurrentUser: false
+            isFromCurrentUser: false,
+            status: .read
         ),
         ChatMessage(
             senderId: "coach",
             text: "Tes tirs en sortie d'écran et ton intensité défensive nous intéressent beaucoup.",
             timestamp: "14:29",
-            isFromCurrentUser: false
+            isFromCurrentUser: false,
+            status: .read
         ),
         ChatMessage(
             senderId: "me",
             text: "Bonjour Coach, merci beaucoup pour le retour ! Je m'entraîne dur tous les jours pour ça.",
             timestamp: "14:31",
-            isFromCurrentUser: true
+            isFromCurrentUser: true,
+            status: .read
         ),
         ChatMessage(
             senderId: "coach",
             text: "Es-tu disponible mardi matin pour échanger plus en détail au club ?",
             timestamp: "14:32",
-            isFromCurrentUser: false
+            isFromCurrentUser: false,
+            status: .read
         )
     ]
     @State private var messageText: String = ""
@@ -110,9 +114,16 @@ public struct ChatDetailView: View {
                     .font(ETTypography.body)
                     .foregroundColor(msg.isFromCurrentUser ? ETColors.pureBlack : ETColors.pureWhite)
                 
-                Text(msg.timestamp)
-                    .font(ETTypography.caption)
-                    .foregroundColor(msg.isFromCurrentUser ? ETColors.pureBlack.opacity(0.75) : ETColors.secondaryText)
+                HStack(spacing: 4) {
+                    Text(msg.timestamp)
+                        .font(ETTypography.caption)
+                        .foregroundColor(msg.isFromCurrentUser ? ETColors.pureBlack.opacity(0.75) : ETColors.secondaryText)
+                    
+                    // Point 5: Statut de lecture du message
+                    if msg.isFromCurrentUser {
+                        statusView(for: msg.status)
+                    }
+                }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
@@ -122,7 +133,41 @@ public struct ChatDetailView: View {
             if !msg.isFromCurrentUser { Spacer(minLength: 40) }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(msg.isFromCurrentUser ? "Moi" : conversation.participantName), \(msg.text), \(msg.timestamp)")
+        .accessibilityLabel("\(msg.isFromCurrentUser ? "Moi" : conversation.participantName), \(msg.text), \(msg.timestamp), \(msg.isFromCurrentUser ? "statut " + msg.status.rawValue : "")")
+    }
+    
+    @ViewBuilder
+    private func statusView(for status: MessageStatus) -> some View {
+        HStack(spacing: 2) {
+            switch status {
+            case .sending:
+                Image(systemName: "clock")
+                    .font(.system(size: 9))
+                    .foregroundColor(ETColors.pureBlack.opacity(0.6))
+            case .sent:
+                Image(systemName: "checkmark")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(ETColors.pureBlack.opacity(0.7))
+            case .delivered:
+                HStack(spacing: -3) {
+                    Image(systemName: "checkmark")
+                    Image(systemName: "checkmark")
+                }
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(ETColors.pureBlack.opacity(0.7))
+            case .read:
+                HStack(spacing: 2) {
+                    HStack(spacing: -3) {
+                        Image(systemName: "checkmark")
+                        Image(systemName: "checkmark")
+                    }
+                    .font(.system(size: 10, weight: .bold))
+                    Text("Lu")
+                        .font(.system(size: 9, weight: .bold))
+                }
+                .foregroundColor(ETColors.pureBlack)
+            }
+        }
     }
     
     private func sendMessage() {
@@ -133,9 +178,23 @@ public struct ChatDetailView: View {
             senderId: "me",
             text: trimmed,
             timestamp: "À l'instant",
-            isFromCurrentUser: true
+            isFromCurrentUser: true,
+            status: .sent
         )
         messages.append(newMsg)
         messageText = ""
+        
+        let msgId = newMsg.id
+        // Simulation dynamique du cycle de vie : Envoyé -> Distribué -> Lu
+        Task {
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            if let idx = messages.firstIndex(where: { $0.id == msgId }) {
+                messages[idx].status = .delivered
+            }
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            if let idx = messages.firstIndex(where: { $0.id == msgId }) {
+                messages[idx].status = .read
+            }
+        }
     }
 }

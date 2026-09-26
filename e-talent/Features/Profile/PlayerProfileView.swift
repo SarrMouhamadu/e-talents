@@ -1,11 +1,14 @@
 import SwiftUI
 
 public struct PlayerProfileView: View {
-    public let player: Player
+    public let initialPlayer: Player
     public var isCurrentUser: Bool = false
     
+    @State private var player: Player
     @State private var selectedTab: ProfileContentTab = .posts
     @State private var isAvailableForRecruiting: Bool = true
+    @State private var activeConversation: Conversation?
+    @State private var showEditProfile: Bool = false
     @Environment(\.dismiss) private var dismiss
     
     public enum ProfileContentTab: String, CaseIterable {
@@ -15,9 +18,14 @@ public struct PlayerProfileView: View {
     }
     
     public init(player: Player, isCurrentUser: Bool = false) {
-        self.player = player
+        self.initialPlayer = player
         self.isCurrentUser = isCurrentUser
+        self._player = State(initialValue: player)
         self._isAvailableForRecruiting = State(initialValue: player.isAvailable)
+    }
+    
+    private var isFollowing: Bool {
+        MockDataService.shared.isFollowing(playerId: player.id)
     }
     
     public var body: some View {
@@ -96,12 +104,15 @@ public struct PlayerProfileView: View {
                         .cornerRadius(ETRadius.card)
                         .padding(.horizontal, ETSpacing.standard)
                         
+                        // Point 6: Modifier mon profil
                         ETButton(
                             "Modifier mon profil",
                             icon: "pencil",
                             style: .secondary,
                             size: .medium
-                        ) {}
+                        ) {
+                            showEditProfile = true
+                        }
                         .padding(.horizontal, ETSpacing.standard)
                     } else {
                         // État pour un visiteur tiers
@@ -114,19 +125,25 @@ public struct PlayerProfileView: View {
                         }
                         
                         HStack(spacing: ETSpacing.standard) {
+                            // Point 1: Contacter le joueur
                             ETButton(
                                 "Contacter",
                                 icon: "paperplane.fill",
                                 style: .primary,
                                 size: .medium
-                            ) {}
+                            ) {
+                                openChat()
+                            }
                             
+                            // Point 2: Suivre le joueur
                             ETButton(
-                                "Suivre",
-                                icon: "plus",
-                                style: .secondary,
+                                isFollowing ? "Abonné" : "Suivre",
+                                icon: isFollowing ? "checkmark" : "plus",
+                                style: isFollowing ? .outline : .secondary,
                                 size: .medium
-                            ) {}
+                            ) {
+                                MockDataService.shared.toggleFollow(playerId: player.id)
+                            }
                         }
                         .padding(.horizontal, ETSpacing.standard)
                     }
@@ -176,7 +193,7 @@ public struct PlayerProfileView: View {
                     // MARK: - Contenu des onglets
                     switch selectedTab {
                     case .posts:
-                        let playerPosts = MockData.samplePosts.filter { $0.authorName == player.name }
+                        let playerPosts = MockDataService.shared.posts.filter { $0.authorName == player.name }
                         if playerPosts.isEmpty {
                             ETEmptyState(
                                 icon: "video.slash",
@@ -241,6 +258,24 @@ public struct PlayerProfileView: View {
                 }
             }
         }
+        .sheet(item: $activeConversation) { conv in
+            NavigationStack {
+                ChatDetailView(conversation: conv)
+            }
+        }
+        .sheet(isPresented: $showEditProfile) {
+            EditProfileView(player: $player)
+        }
+    }
+    
+    private func openChat() {
+        let conv = MockDataService.shared.getOrCreateConversation(
+            for: player.name,
+            role: "Joueur",
+            club: player.clubName,
+            isVerified: player.isVerified
+        )
+        activeConversation = conv
     }
     
     private func statBadge(title: String, value: String) -> some View {

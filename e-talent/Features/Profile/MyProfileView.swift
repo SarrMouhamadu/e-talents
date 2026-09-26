@@ -27,6 +27,9 @@ public struct MyProfileView: View {
                     .accessibilityLabel("Paramètres du compte")
                 }
             }
+            .sheet(isPresented: $showSettings) {
+                SettingsView(player: $currentPlayer)
+            }
         }
     }
 }

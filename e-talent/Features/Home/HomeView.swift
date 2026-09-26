@@ -3,6 +3,7 @@ import SwiftUI
 public struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var selectedPlayer: Player?
+    @State private var selectedPostForComments: Post?
     @State private var showNotifications: Bool = false
     
     public init() {}
@@ -54,7 +55,7 @@ public struct HomeView: View {
                                             viewModel.toggleLike(postId: post.id)
                                         },
                                         onCommentTapped: {
-                                            // Action commentaire
+                                            selectedPostForComments = post
                                         },
                                         onBookmarkTapped: {
                                             viewModel.toggleBookmark(postId: post.id)
@@ -81,6 +82,9 @@ public struct HomeView: View {
                 NavigationStack {
                     PlayerProfileView(player: player)
                 }
+            }
+            .sheet(item: $selectedPostForComments) { post in
+                CommentsSheetView(post: post)
             }
             .sheet(isPresented: $showNotifications) {
                 NavigationStack {

@@ -3,10 +3,15 @@ import SwiftUI
 public struct ClubProfileView: View {
     public let club: Club
     @State private var selectedPlayer: Player?
+    @State private var activeConversation: Conversation?
     @Environment(\.dismiss) private var dismiss
     
     public init(club: Club) {
         self.club = club
+    }
+    
+    private var isFollowing: Bool {
+        MockDataService.shared.isFollowingClub(clubId: club.id)
     }
     
     public var body: some View {
@@ -39,10 +44,20 @@ public struct ClubProfileView: View {
                     }
                     .padding(.top, ETSpacing.standard)
                     
-                    // Actions
+                    // Actions (Suivre et Contacter)
                     HStack(spacing: ETSpacing.standard) {
-                        ETButton("Suivre le club", icon: "plus", style: .primary, size: .medium) {}
-                        ETButton("Contacter", icon: "paperplane.fill", style: .secondary, size: .medium) {}
+                        ETButton(
+                            isFollowing ? "Abonné" : "Suivre le club",
+                            icon: isFollowing ? "checkmark" : "plus",
+                            style: isFollowing ? .outline : .primary,
+                            size: .medium
+                        ) {
+                            MockDataService.shared.toggleFollowClub(clubId: club.id)
+                        }
+                        
+                        ETButton("Contacter", icon: "paperplane.fill", style: .secondary, size: .medium) {
+                            openChat()
+                        }
                     }
                     .padding(.horizontal, ETSpacing.standard)
                     
@@ -116,5 +131,20 @@ public struct ClubProfileView: View {
                 PlayerProfileView(player: player)
             }
         }
+        .sheet(item: $activeConversation) { conv in
+            NavigationStack {
+                ChatDetailView(conversation: conv)
+            }
+        }
+    }
+    
+    private func openChat() {
+        let conv = MockDataService.shared.getOrCreateConversation(
+            for: club.name,
+            role: "Club",
+            club: nil,
+            isVerified: club.isVerified
+        )
+        activeConversation = conv
     }
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 public struct PlayerProfileCreationView: View {
     @State private var fullName: String = ""
@@ -9,6 +10,10 @@ public struct PlayerProfileCreationView: View {
     @State private var club: String = ""
     @State private var isAvailable: Bool = true
     @State private var bio: String = ""
+    
+    // Photo selection state
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var profileImage: UIImage?
     
     public var onComplete: () -> Void
     
@@ -34,25 +39,36 @@ public struct PlayerProfileCreationView: View {
                     }
                     .padding(.top, ETSpacing.standard)
                     
-                    // Photo de profil bouton interactif
+                    // Photo de profil bouton interactif avec PhotosPicker
                     HStack {
                         Spacer()
-                        Button(action: {}) {
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                             VStack(spacing: ETSpacing.xSmall) {
                                 ZStack {
-                                    Circle()
-                                        .fill(ETColors.darkSurface)
-                                        .frame(width: 90, height: 90)
-                                        .overlay(
-                                            Circle().stroke(ETColors.primaryOrange, lineWidth: 1.5)
-                                        )
-                                    
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 26))
-                                        .foregroundColor(ETColors.primaryOrange)
+                                    if let profileImage {
+                                        Image(uiImage: profileImage)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 90, height: 90)
+                                            .clipShape(Circle())
+                                            .overlay(
+                                                Circle().stroke(ETColors.primaryOrange, lineWidth: 2)
+                                            )
+                                    } else {
+                                        Circle()
+                                            .fill(ETColors.darkSurface)
+                                            .frame(width: 90, height: 90)
+                                            .overlay(
+                                                Circle().stroke(ETColors.primaryOrange, lineWidth: 1.5)
+                                            )
+                                        
+                                        Image(systemName: "camera.fill")
+                                            .font(.system(size: 26))
+                                            .foregroundColor(ETColors.primaryOrange)
+                                    }
                                 }
                                 
-                                Text("Ajouter une photo")
+                                Text(profileImage != nil ? "Modifier la photo" : "Ajouter une photo")
                                     .font(ETTypography.caption)
                                     .foregroundColor(ETColors.primaryOrange)
                             }
@@ -61,6 +77,16 @@ public struct PlayerProfileCreationView: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel("Ajouter une photo de profil")
                         Spacer()
+                    }
+                    .onChange(of: selectedPhotoItem) { _, newItem in
+                        Task {
+                            if let data = try? await newItem?.loadTransferable(type: Data.self),
+                               let image = UIImage(data: data) {
+                                await MainActor.run {
+                                    self.profileImage = image
+                                }
+                            }
+                        }
                     }
                     
                     // Formulaire

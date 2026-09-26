@@ -6,6 +6,31 @@ public enum PostMediaType: String, Codable {
     case none
 }
 
+public struct PostComment: Identifiable, Hashable, Codable {
+    public let id: String
+    public var authorName: String
+    public var authorRole: String
+    public var text: String
+    public var timeAgo: String
+    public var isVerified: Bool
+    
+    public init(
+        id: String = UUID().uuidString,
+        authorName: String,
+        authorRole: String = "Joueur",
+        text: String,
+        timeAgo: String = "À l'instant",
+        isVerified: Bool = false
+    ) {
+        self.id = id
+        self.authorName = authorName
+        self.authorRole = authorRole
+        self.text = text
+        self.timeAgo = timeAgo
+        self.isVerified = isVerified
+    }
+}
+
 public struct Post: Identifiable, Hashable, Codable {
     public let id: String
     public var authorId: String
@@ -25,6 +50,8 @@ public struct Post: Identifiable, Hashable, Codable {
     public var commentsCount: Int
     public var isLiked: Bool
     public var isBookmarked: Bool
+    public var comments: [PostComment]
+    public var imageData: Data?
     
     public init(
         id: String = UUID().uuidString,
@@ -44,7 +71,9 @@ public struct Post: Identifiable, Hashable, Codable {
         likesCount: Int = 0,
         commentsCount: Int = 0,
         isLiked: Bool = false,
-        isBookmarked: Bool = false
+        isBookmarked: Bool = false,
+        comments: [PostComment] = [],
+        imageData: Data? = nil
     ) {
         self.id = id
         self.authorId = authorId
@@ -61,8 +90,10 @@ public struct Post: Identifiable, Hashable, Codable {
         self.mediaAspectRatio = mediaAspectRatio
         self.mediaCaption = mediaCaption
         self.likesCount = likesCount
-        self.commentsCount = commentsCount
+        self.commentsCount = commentsCount > 0 ? commentsCount : comments.count
         self.isLiked = isLiked
         self.isBookmarked = isBookmarked
+        self.comments = comments
+        self.imageData = imageData
     }
 }

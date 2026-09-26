@@ -1,12 +1,20 @@
 import SwiftUI
+import PhotosUI
 
 public struct CreatePostView: View {
     @State private var postContent: String = ""
-    @State private var selectedMediaType: PostMediaType = .video
+    @State private var selectedMediaType: PostMediaType = .photo
     @State private var mediaCaption: String = "Workout Session • Marius Ndiaye"
     @State private var isSubmitting: Bool = false
     @State private var isSuccess: Bool = false
     @Environment(\.dismiss) private var dismiss
+    
+    // Photo / Video picker states
+    @State private var selectedPickerItem: PhotosPickerItem?
+    @State private var selectedImageData: Data?
+    @State private var selectedImage: UIImage?
+    @State private var selectedVideoFilename: String?
+    @State private var isLoadingMedia: Bool = false
     
     public init() {}
     
@@ -52,24 +60,24 @@ public struct CreatePostView: View {
                         .background(ETColors.darkSurface)
                         .cornerRadius(ETRadius.card)
                         
-                        // Choix du média
+                        // Choix du format média
                         VStack(alignment: .leading, spacing: ETSpacing.xSmall) {
-                            Text("TYPE DE MÉDIA")
+                            Text("TYPE DE CONTENU")
                                 .font(ETTypography.caption)
                                 .fontWeight(.bold)
                                 .foregroundColor(ETColors.secondaryText)
                             
                             HStack(spacing: ETSpacing.small) {
                                 mediaOptionButton(
-                                    title: "Vidéo Highlight",
-                                    icon: "play.circle.fill",
-                                    type: .video
-                                )
-                                
-                                mediaOptionButton(
                                     title: "Photo",
                                     icon: "photo.fill",
                                     type: .photo
+                                )
+                                
+                                mediaOptionButton(
+                                    title: "Vidéo Highlight",
+                                    icon: "play.circle.fill",
+                                    type: .video
                                 )
                                 
                                 mediaOptionButton(
@@ -80,33 +88,157 @@ public struct CreatePostView: View {
                             }
                         }
                         
-                        // Aperçu du média sélectionné
+                        // Sélecteur & Aperçu du média
                         if selectedMediaType != .none {
-                            VStack(alignment: .leading, spacing: ETSpacing.xxSmall) {
-                                Text("APERÇU DU CONTENU")
-                                    .font(ETTypography.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(ETColors.secondaryText)
+                            VStack(alignment: .leading, spacing: ETSpacing.xSmall) {
+                                HStack {
+                                    Text(selectedMediaType == .video ? "VIDÉO HIGHLIGHT" : "PHOTO")
+                                        .font(ETTypography.caption)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(ETColors.secondaryText)
+                                    
+                                    Spacer()
+                                    
+                                    if selectedImage != nil || selectedVideoFilename != nil {
+                                        Button("Supprimer") {
+                                            selectedPickerItem = nil
+                                            selectedImageData = nil
+                                            selectedImage = nil
+                                            selectedVideoFilename = nil
+                                        }
+                                        .font(ETTypography.caption)
+                                        .foregroundColor(ETColors.error)
+                                        .frame(minHeight: 44)
+                                    }
+                                }
                                 
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: ETRadius.media)
-                                        .fill(ETColors.darkSurface)
-                                        .aspectRatio(selectedMediaType == .video ? 1.77 : 0.8, contentMode: .fit)
-                                        .overlay(
-                                            VStack(spacing: ETSpacing.small) {
-                                                Image(systemName: selectedMediaType == .video ? "video.badge.plus" : "photo.badge.plus")
-                                                    .font(.system(size: 38))
-                                                    .foregroundColor(ETColors.primaryOrange)
-                                                
-                                                Text(selectedMediaType == .video ? "Vidéo sélectionnée (Format 16:9)" : "Photo sélectionnée (Format 4:5)")
-                                                    .font(ETTypography.caption)
-                                                    .foregroundColor(ETColors.pureWhite)
+                                // Preview Container or Selector
+                                if let selectedImage {
+                                    // Live image preview
+                                    ZStack(alignment: .bottomTrailing) {
+                                        Image(uiImage: selectedImage)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(maxWidth: .infinity)
+                                            .aspectRatio(0.8, contentMode: .fit)
+                                            .clipped()
+                                            .cornerRadius(ETRadius.media)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: ETRadius.media)
+                                                    .stroke(ETColors.primaryOrange.opacity(0.4), lineWidth: 1.5)
+                                            )
+                                        
+                                        PhotosPicker(
+                                            selection: $selectedPickerItem,
+                                            matching: .images
+                                        ) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "arrow.triangle.2.circlepath")
+                                                Text("Changer")
                                             }
-                                        )
-                                        .overlay(
+                                            .font(ETTypography.caption)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(ETColors.pureBlack)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(ETColors.primaryOrange)
+                                            .cornerRadius(ETRadius.small)
+                                            .padding(ETSpacing.small)
+                                        }
+                                    }
+                                } else if let videoName = selectedVideoFilename {
+                                    // Video Selected Preview Card
+                                    VStack(spacing: ETSpacing.small) {
+                                        ZStack {
                                             RoundedRectangle(cornerRadius: ETRadius.media)
-                                                .stroke(ETColors.borderGray.opacity(0.15), lineWidth: 1)
-                                        )
+                                                .fill(
+                                                    LinearGradient(
+                                                        colors: [Color(hex: "#1F1F24"), Color(hex: "#121215")],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    )
+                                                )
+                                                .aspectRatio(1.77, contentMode: .fit)
+                                                .overlay(
+                                                    VStack(spacing: ETSpacing.xSmall) {
+                                                        Image(systemName: "play.circle.fill")
+                                                            .font(.system(size: 48))
+                                                            .foregroundColor(ETColors.primaryOrange)
+                                                        
+                                                        Text(videoName)
+                                                            .font(ETTypography.subheadlineBold)
+                                                            .foregroundColor(ETColors.pureWhite)
+                                                        
+                                                        Text("Highlight prêt pour mise en ligne")
+                                                            .font(ETTypography.caption)
+                                                            .foregroundColor(ETColors.secondaryText)
+                                                    }
+                                                )
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: ETRadius.media)
+                                                        .stroke(ETColors.primaryOrange.opacity(0.4), lineWidth: 1.5)
+                                                )
+                                        }
+                                        
+                                        PhotosPicker(
+                                            selection: $selectedPickerItem,
+                                            matching: .videos
+                                        ) {
+                                            HStack(spacing: 6) {
+                                                Image(systemName: "arrow.triangle.2.circlepath")
+                                                Text("Choisir une autre vidéo")
+                                            }
+                                            .font(ETTypography.callout)
+                                            .foregroundColor(ETColors.primaryOrange)
+                                            .frame(maxWidth: .infinity, minHeight: 44)
+                                            .background(ETColors.darkSurface)
+                                            .cornerRadius(ETRadius.button)
+                                        }
+                                    }
+                                } else {
+                                    // Empty picker trigger button
+                                    PhotosPicker(
+                                        selection: $selectedPickerItem,
+                                        matching: selectedMediaType == .video ? .videos : .images
+                                    ) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: ETRadius.media)
+                                                .fill(ETColors.darkSurface)
+                                                .aspectRatio(selectedMediaType == .video ? 1.77 : 0.8, contentMode: .fit)
+                                                .overlay(
+                                                    VStack(spacing: ETSpacing.small) {
+                                                        if isLoadingMedia {
+                                                            ProgressView()
+                                                                .tint(ETColors.primaryOrange)
+                                                                .scaleEffect(1.3)
+                                                            Text("Chargement du média...")
+                                                                .font(ETTypography.caption)
+                                                                .foregroundColor(ETColors.secondaryText)
+                                                        } else {
+                                                            Image(systemName: selectedMediaType == .video ? "video.badge.plus" : "photo.badge.plus")
+                                                                .font(.system(size: 38))
+                                                                .foregroundColor(ETColors.primaryOrange)
+                                                            
+                                                            Text(selectedMediaType == .video ? "Sélectionner une vidéo highlight" : "Sélectionner une photo")
+                                                                .font(ETTypography.subheadlineBold)
+                                                                .foregroundColor(ETColors.pureWhite)
+                                                            
+                                                            Text("Appuyez pour ouvrir la galerie")
+                                                                .font(ETTypography.caption)
+                                                                .foregroundColor(ETColors.secondaryText)
+                                                        }
+                                                    }
+                                                )
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: ETRadius.media)
+                                                        .strokeBorder(
+                                                            style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])
+                                                        )
+                                                        .foregroundColor(ETColors.primaryOrange.opacity(0.6))
+                                                )
+                                        }
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                         }
@@ -156,11 +288,20 @@ public struct CreatePostView: View {
                     .accessibilityLabel("Annuler la publication")
                 }
             }
+            .onChange(of: selectedPickerItem) { _, newItem in
+                handleMediaSelection(newItem)
+            }
         }
     }
     
     private func mediaOptionButton(title: String, icon: String, type: PostMediaType) -> some View {
-        Button(action: { selectedMediaType = type }) {
+        Button(action: {
+            selectedMediaType = type
+            selectedPickerItem = nil
+            selectedImageData = nil
+            selectedImage = nil
+            selectedVideoFilename = nil
+        }) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 13))
@@ -182,13 +323,50 @@ public struct CreatePostView: View {
         .accessibilityLabel("\(title), \(selectedMediaType == type ? "sélectionné" : "")")
     }
     
+    private func handleMediaSelection(_ item: PhotosPickerItem?) {
+        guard let item else { return }
+        isLoadingMedia = true
+        
+        Task {
+            if selectedMediaType == .photo {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    await MainActor.run {
+                        self.selectedImageData = data
+                        self.selectedImage = uiImage
+                        self.isLoadingMedia = false
+                    }
+                } else {
+                    await MainActor.run {
+                        self.isLoadingMedia = false
+                    }
+                }
+            } else if selectedMediaType == .video {
+                if let data = try? await item.loadTransferable(type: Data.self) {
+                    let formattedSize = ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
+                    await MainActor.run {
+                        self.selectedVideoFilename = "Highlight_Dakar_2026.mp4 (\(formattedSize))"
+                        self.isLoadingMedia = false
+                    }
+                } else {
+                    await MainActor.run {
+                        self.selectedVideoFilename = "Highlight_Dakar_2026.mp4"
+                        self.isLoadingMedia = false
+                    }
+                }
+            }
+        }
+    }
+    
     private func submitPost() {
         isSubmitting = true
         Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             MockDataService.shared.addPost(
                 content: postContent,
-                mediaType: selectedMediaType
+                mediaType: selectedMediaType,
+                caption: selectedVideoFilename ?? (selectedMediaType == .video ? "Session Highlight 2026" : "Photo de performance"),
+                imageData: selectedImageData
             )
             isSubmitting = false
             isSuccess = true

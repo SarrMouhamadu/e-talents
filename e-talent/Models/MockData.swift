@@ -148,7 +148,11 @@ public enum MockData {
             likesCount: 142,
             commentsCount: 18,
             isLiked: true,
-            isBookmarked: false
+            isBookmarked: false,
+            comments: [
+                PostComment(authorName: "Moussa Ndiaye", authorRole: "Joueur", text: "Propre le step-back bro ! 🔥🇸🇳", timeAgo: "Il y a 1h"),
+                PostComment(authorName: "Coach Babacar", authorRole: "Coach", text: "Très bon travail sur les appuis, continue comme ça.", timeAgo: "Il y a 45 min", isVerified: true)
+            ]
         ),
         Post(
             id: "post_2",
@@ -167,7 +171,11 @@ public enum MockData {
             likesCount: 384,
             commentsCount: 32,
             isLiked: false,
-            isBookmarked: true
+            isBookmarked: true,
+            comments: [
+                PostComment(authorName: "Ibrahima Fall", authorRole: "Joueur", text: "Fierté de porter ce maillot ! 🏀", timeAgo: "Il y a 4h", isVerified: true),
+                PostComment(authorName: "Cheikh Diop", authorRole: "Joueur", text: "Grosse performance d'équipe !", timeAgo: "Il y a 3h")
+            ]
         ),
         Post(
             id: "post_3",
@@ -186,7 +194,10 @@ public enum MockData {
             likesCount: 267,
             commentsCount: 45,
             isLiked: false,
-            isBookmarked: false
+            isBookmarked: false,
+            comments: [
+                PostComment(authorName: "Coach Babacar", authorRole: "Coach", text: "Intéressant profil athlétique. Viens nous voir mardi.", timeAgo: "Il y a 18h", isVerified: true)
+            ]
         ),
         Post(
             id: "post_4",
@@ -205,7 +216,8 @@ public enum MockData {
             likesCount: 98,
             commentsCount: 12,
             isLiked: false,
-            isBookmarked: false
+            isBookmarked: false,
+            comments: []
         )
     ]
     

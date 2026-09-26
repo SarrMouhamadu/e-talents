@@ -1,24 +1,34 @@
 import Foundation
 
+public enum MessageStatus: String, Codable {
+    case sending = "Envoi..."
+    case sent = "Envoyé"
+    case delivered = "Distribué"
+    case read = "Lu"
+}
+
 public struct ChatMessage: Identifiable, Hashable, Codable {
     public let id: String
     public var senderId: String
     public var text: String
     public var timestamp: String
     public var isFromCurrentUser: Bool
+    public var status: MessageStatus
     
     public init(
         id: String = UUID().uuidString,
         senderId: String,
         text: String,
         timestamp: String,
-        isFromCurrentUser: Bool
+        isFromCurrentUser: Bool,
+        status: MessageStatus = .read
     ) {
         self.id = id
         self.senderId = senderId
         self.text = text
         self.timestamp = timestamp
         self.isFromCurrentUser = isFromCurrentUser
+        self.status = status
     }
 }
 

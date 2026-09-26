@@ -89,32 +89,45 @@ public struct ETPostCard: View {
             // MARK: - Média (Photo ou Vidéo basketball)
             if post.mediaType != .none {
                 ZStack(alignment: .bottomLeading) {
-                    RoundedRectangle(cornerRadius: ETRadius.media)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(hex: "#1F1F24"), Color(hex: "#121215")],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                    if let data = post.imageData, let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .aspectRatio(post.mediaAspectRatio, contentMode: .fit)
+                            .clipped()
+                            .cornerRadius(ETRadius.media)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: ETRadius.media)
+                                    .stroke(ETColors.borderGray.opacity(0.15), lineWidth: 1)
                             )
-                        )
-                        .aspectRatio(post.mediaAspectRatio, contentMode: .fit)
-                        .overlay(
-                            VStack(spacing: ETSpacing.small) {
-                                Image(systemName: post.mediaType == .video ? "play.circle.fill" : "basketball.fill")
-                                    .font(.system(size: 42))
-                                    .foregroundColor(ETColors.primaryOrange.opacity(0.85))
-                                
-                                if let caption = post.mediaCaption {
-                                    Text(caption)
-                                        .font(ETTypography.caption)
-                                        .foregroundColor(ETColors.secondaryText)
+                    } else {
+                        RoundedRectangle(cornerRadius: ETRadius.media)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color(hex: "#1F1F24"), Color(hex: "#121215")],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .aspectRatio(post.mediaAspectRatio, contentMode: .fit)
+                            .overlay(
+                                VStack(spacing: ETSpacing.small) {
+                                    Image(systemName: post.mediaType == .video ? "play.circle.fill" : "basketball.fill")
+                                        .font(.system(size: 42))
+                                        .foregroundColor(ETColors.primaryOrange.opacity(0.85))
+                                    
+                                    if let caption = post.mediaCaption {
+                                        Text(caption)
+                                            .font(ETTypography.caption)
+                                            .foregroundColor(ETColors.secondaryText)
+                                    }
                                 }
-                            }
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: ETRadius.media)
-                                .stroke(ETColors.borderGray.opacity(0.1), lineWidth: 1)
-                        )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: ETRadius.media)
+                                    .stroke(ETColors.borderGray.opacity(0.1), lineWidth: 1)
+                            )
+                    }
                     
                     if post.mediaType == .video {
                         HStack(spacing: ETSpacing.xxSmall) {
