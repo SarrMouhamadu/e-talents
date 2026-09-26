@@ -16,36 +16,14 @@ public struct SplashView: View {
             VStack(spacing: ETSpacing.large) {
                 Spacer()
                 
-                // Logo & Basket Icon
-                ZStack {
-                    Circle()
-                        .fill(ETColors.primaryOrange.opacity(0.12))
-                        .frame(width: 120, height: 120)
-                    
-                    Image(systemName: "basketball.fill")
-                        .font(.system(size: 64))
-                        .foregroundColor(ETColors.primaryOrange)
-                }
-                
-                VStack(spacing: ETSpacing.xSmall) {
-                    Text("E-TALENT")
-                        .font(.system(size: 34, weight: .black, design: .rounded))
-                        .foregroundColor(ETColors.pureWhite)
-                        .tracking(2)
-                    
-                    Text("BASKETBALL SÉNÉGAL")
-                        .font(ETTypography.badge)
-                        .fontWeight(.bold)
-                        .foregroundColor(ETColors.primaryOrange)
-                        .tracking(3)
-                }
-                
-                // Drapeau discret Sénégal
-                HStack(spacing: 4) {
-                    RoundedRectangle(cornerRadius: 2).fill(ETColors.senegalGreen).frame(width: 14, height: 4)
-                    RoundedRectangle(cornerRadius: 2).fill(ETColors.senegalYellow).frame(width: 14, height: 4)
-                    RoundedRectangle(cornerRadius: 2).fill(ETColors.senegalRed).frame(width: 14, height: 4)
-                }
+                // Logo officiel E-TALENT
+                Image("ETalentLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 240, maxHeight: 240)
+                    .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
+                    .shadow(color: ETColors.primaryOrange.opacity(0.25), radius: 24, x: 0, y: 10)
+                    .accessibilityLabel("Logo officiel E-Talent")
                 
                 Spacer()
                 

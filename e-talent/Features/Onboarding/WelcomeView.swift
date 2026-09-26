@@ -15,33 +15,35 @@ public struct WelcomeView: View {
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: ETSpacing.large) {
-                    // Hero Graphic
-                    ZStack {
-                        Circle()
-                            .fill(ETColors.darkSurface)
-                            .frame(width: 130, height: 130)
-                            .overlay(
-                                Circle().stroke(ETColors.primaryOrange.opacity(0.25), lineWidth: 1.5)
-                            )
-                        
-                        Image(systemName: "figure.basketball")
-                            .font(.system(size: 64))
-                            .foregroundColor(ETColors.primaryOrange)
-                    }
-                    .padding(.top, ETSpacing.large)
+                    // Logo officiel E-TALENT
+                    Image("ETalentLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 160, maxHeight: 160)
+                        .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+                        .shadow(color: ETColors.primaryOrange.opacity(0.25), radius: 18, x: 0, y: 6)
+                        .accessibilityLabel("Logo officiel E-Talent")
+                        .padding(.top, ETSpacing.large)
                     
-                    // Titre & Sous-titre
-                    VStack(spacing: ETSpacing.small) {
-                        Text("Révèle ton talent au basketball")
-                            .font(ETTypography.largeTitle)
+                    // Titre & Slogan officiel
+                    VStack(spacing: ETSpacing.xSmall) {
+                        Text("E-TALENT")
+                            .font(.system(size: 30, weight: .black, design: .rounded))
                             .foregroundColor(ETColors.pureWhite)
-                            .multilineTextAlignment(.center)
+                            .tracking(2)
                         
-                        Text("La première plateforme dédiée aux basketteurs et clubs du Sénégal.")
-                            .font(ETTypography.body)
+                        Text("Crée ton profil. Montre ton talent. Fais-toi découvrir.")
+                            .font(ETTypography.headline)
+                            .foregroundColor(ETColors.primaryOrange)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, ETSpacing.standard)
+                        
+                        Text("Le réseau des talents et clubs du basketball sénégalais.")
+                            .font(ETTypography.callout)
                             .foregroundColor(ETColors.secondaryText)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, ETSpacing.standard)
+                            .padding(.top, 2)
                     }
                     
                     // Piliers de valeur

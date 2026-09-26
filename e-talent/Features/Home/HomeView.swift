@@ -109,9 +109,16 @@ public struct HomeView: View {
     // MARK: - Custom Header
     private var headerBar: some View {
         HStack {
-            HStack(spacing: 6) {
+            HStack(spacing: ETSpacing.small) {
+                Image("ETalentLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 32, height: 32)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .accessibilityHidden(true)
+                
                 Text("E-TALENT")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .font(.system(size: 20, weight: .black, design: .rounded))
                     .foregroundColor(ETColors.pureWhite)
                 
                 // Discret accent identitaire Sénégal (3 micro pastilles)
