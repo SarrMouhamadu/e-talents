@@ -1,6 +1,7 @@
 import SwiftUI
 
 public struct MyProfileView: View {
+    @AppStorage("userAccountType") private var userAccountType: String = "player"
     @State private var currentPlayer: Player = MockData.samplePlayers[1] // Mamadou Sarr
     @State private var showSettings: Bool = false
     
@@ -11,10 +12,13 @@ public struct MyProfileView: View {
             ZStack {
                 ETColors.background.ignoresSafeArea()
                 
-                // Vue profil unifiée sans duplication d'en-tête ni de ScrollView
-                PlayerProfileView(player: currentPlayer, isCurrentUser: true)
+                if userAccountType == "club", let currentClub = MockDataService.shared.currentClub {
+                    ClubProfileView(club: currentClub, isCurrentClub: true)
+                } else {
+                    PlayerProfileView(player: currentPlayer, isCurrentUser: true)
+                }
             }
-            .navigationTitle("Mon Profil")
+            .navigationTitle(userAccountType == "club" ? "Profil du Club" : "Mon Profil")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

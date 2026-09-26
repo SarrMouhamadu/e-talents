@@ -9,6 +9,7 @@ public final class MockDataService {
     public var posts: [Post] = MockData.samplePosts
     public var players: [Player] = MockData.samplePlayers
     public var clubs: [Club] = MockData.sampleClubs
+    public var currentClub: Club? = MockData.sampleClubs.first
     public var conversations: [Conversation] = MockData.sampleConversations
     public var notifications: [NotificationItem] = MockData.sampleNotifications
     

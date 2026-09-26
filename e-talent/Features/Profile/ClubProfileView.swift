@@ -2,12 +2,14 @@ import SwiftUI
 
 public struct ClubProfileView: View {
     public let club: Club
+    public var isCurrentClub: Bool
     @State private var selectedPlayer: Player?
     @State private var activeConversation: Conversation?
     @Environment(\.dismiss) private var dismiss
     
-    public init(club: Club) {
+    public init(club: Club, isCurrentClub: Bool = false) {
         self.club = club
+        self.isCurrentClub = isCurrentClub
     }
     
     private var isFollowing: Bool {
@@ -22,7 +24,16 @@ public struct ClubProfileView: View {
                 VStack(spacing: ETSpacing.standard) {
                     // Header Club
                     VStack(spacing: ETSpacing.small) {
-                        ETAvatar(name: club.name, size: .xLarge, isVerified: club.isVerified)
+                        if let data = club.logoData, let image = UIImage(data: data) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(ETColors.primaryOrange, lineWidth: 2))
+                        } else {
+                            ETAvatar(name: club.name, size: .xLarge, isVerified: club.isVerified)
+                        }
                         
                         VStack(spacing: 4) {
                             HStack(spacing: ETSpacing.xxSmall) {
@@ -44,22 +55,56 @@ public struct ClubProfileView: View {
                     }
                     .padding(.top, ETSpacing.standard)
                     
-                    // Actions (Suivre et Contacter)
-                    HStack(spacing: ETSpacing.standard) {
-                        ETButton(
-                            isFollowing ? "Abonné" : "Suivre le club",
-                            icon: isFollowing ? "checkmark" : "plus",
-                            style: isFollowing ? .outline : .primary,
-                            size: .medium
-                        ) {
-                            MockDataService.shared.toggleFollowClub(clubId: club.id)
+                    // Représentant officiel (pour les clubs)
+                    if let repName = club.representativeName {
+                        HStack(spacing: ETSpacing.small) {
+                            Image(systemName: "person.crop.circle.badge.checkmark")
+                                .font(.system(size: 22))
+                                .foregroundColor(ETColors.primaryOrange)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Contact officiel du club")
+                                    .font(ETTypography.caption)
+                                    .foregroundColor(ETColors.secondaryText)
+                                
+                                Text("\(repName) • \(club.representativeRole ?? "Dirigeant")")
+                                    .font(ETTypography.subheadlineBold)
+                                    .foregroundColor(ETColors.pureWhite)
+                            }
+                            
+                            Spacer()
                         }
-                        
-                        ETButton("Contacter", icon: "paperplane.fill", style: .secondary, size: .medium) {
-                            openChat()
-                        }
+                        .padding(ETSpacing.small)
+                        .background(ETColors.darkSurface)
+                        .cornerRadius(ETRadius.card)
+                        .padding(.horizontal, ETSpacing.standard)
                     }
-                    .padding(.horizontal, ETSpacing.standard)
+                    
+                    // Actions (Gérer si profil propre, sinon Suivre et Contacter)
+                    if isCurrentClub {
+                        HStack(spacing: ETSpacing.standard) {
+                            ETButton("Annoncer une détection", icon: "megaphone.fill", style: .primary, size: .medium) {
+                                // Action détection
+                            }
+                        }
+                        .padding(.horizontal, ETSpacing.standard)
+                    } else {
+                        HStack(spacing: ETSpacing.standard) {
+                            ETButton(
+                                isFollowing ? "Abonné" : "Suivre le club",
+                                icon: isFollowing ? "checkmark" : "plus",
+                                style: isFollowing ? .outline : .primary,
+                                size: .medium
+                            ) {
+                                MockDataService.shared.toggleFollowClub(clubId: club.id)
+                            }
+                            
+                            ETButton("Contacter", icon: "paperplane.fill", style: .secondary, size: .medium) {
+                                openChat()
+                            }
+                        }
+                        .padding(.horizontal, ETSpacing.standard)
+                    }
                     
                     // Description
                     VStack(alignment: .leading, spacing: ETSpacing.xxSmall) {

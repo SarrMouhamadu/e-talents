@@ -9,7 +9,8 @@ struct ETalentApp: App {
     enum OnboardingStep {
         case welcome
         case accountType
-        case createProfile
+        case createPlayerProfile
+        case createClubProfile
     }
     
     var body: some Scene {
@@ -28,11 +29,22 @@ struct ETalentApp: App {
                                 onSkip: { hasCompletedOnboarding = true }
                             )
                         case .accountType:
-                            AccountTypeView { _ in
-                                onboardingStep = .createProfile
+                            AccountTypeView { type in
+                                switch type {
+                                case .player:
+                                    onboardingStep = .createPlayerProfile
+                                case .club:
+                                    onboardingStep = .createClubProfile
+                                }
                             }
-                        case .createProfile:
+                        case .createPlayerProfile:
                             PlayerProfileCreationView {
+                                withAnimation {
+                                    hasCompletedOnboarding = true
+                                }
+                            }
+                        case .createClubProfile:
+                            ClubProfileCreationView {
                                 withAnimation {
                                     hasCompletedOnboarding = true
                                 }

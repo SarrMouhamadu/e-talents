@@ -4,6 +4,7 @@ public struct SettingsView: View {
     @Binding var player: Player
     @Environment(\.dismiss) private var dismiss
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
+    @AppStorage("userAccountType") private var userAccountType: String = "player"
     
     @State private var showEditProfile: Bool = false
     @State private var showLogoutConfirmation: Bool = false
@@ -22,23 +23,25 @@ public struct SettingsView: View {
                 List {
                     // MARK: - Section Compte
                     Section(header: Text("COMPTE").font(ETTypography.caption).foregroundColor(ETColors.secondaryText)) {
-                        Button(action: { showEditProfile = true }) {
-                            HStack {
-                                Label("Modifier mon profil", systemImage: "person.crop.circle")
-                                    .foregroundColor(ETColors.pureWhite)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(ETColors.secondaryText)
+                        if userAccountType == "player" {
+                            Button(action: { showEditProfile = true }) {
+                                HStack {
+                                    Label("Modifier mon profil", systemImage: "person.crop.circle")
+                                        .foregroundColor(ETColors.pureWhite)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(ETColors.secondaryText)
+                                }
+                                .frame(minHeight: 44)
                             }
-                            .frame(minHeight: 44)
                         }
                         
                         HStack {
-                            Label("Statut actuel", systemImage: "figure.basketball")
+                            Label("Statut du compte", systemImage: userAccountType == "club" ? "shield.checkered" : "figure.basketball")
                                 .foregroundColor(ETColors.pureWhite)
                             Spacer()
-                            Text("Joueur vérifié")
+                            Text(userAccountType == "club" ? "Club vérifié" : "Joueur vérifié")
                                 .font(ETTypography.caption)
                                 .foregroundColor(ETColors.primaryOrange)
                         }
@@ -142,6 +145,7 @@ public struct SettingsView: View {
         dismiss()
         withAnimation(.easeInOut(duration: 0.3)) {
             hasCompletedOnboarding = false
+            userAccountType = "player"
         }
     }
 }
