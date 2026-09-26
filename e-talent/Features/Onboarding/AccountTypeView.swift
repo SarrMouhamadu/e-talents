@@ -36,7 +36,7 @@ public struct AccountTypeView: View {
                     accountCard(
                         type: .player,
                         title: "Je suis un Joueur",
-                        subtitle: "Pour créer ma fiche sportive, publier mes highlights et me faire repérer par les clubs.",
+                        subtitle: "Pour créer mon profil, publier mes performances et me faire découvrir.",
                         icon: "figure.basketball",
                         isSelected: selectedType == .player
                     )
@@ -45,7 +45,7 @@ public struct AccountTypeView: View {
                     accountCard(
                         type: .club,
                         title: "Je représente un Club",
-                        subtitle: "Pour présenter mon équipe, annoncer des détections et recruter de nouveaux talents.",
+                        subtitle: "Pour présenter mon équipe, annoncer des détections et découvrir de nouveaux talents.",
                         icon: "shield.checkered",
                         isSelected: selectedType == .club
                     )

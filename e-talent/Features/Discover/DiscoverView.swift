@@ -13,10 +13,20 @@ public struct DiscoverView: View {
                 ETColors.background.ignoresSafeArea()
                 
                 VStack(spacing: ETSpacing.small) {
+                    // MARK: - Subtitle
+                    VStack(alignment: .leading, spacing: ETSpacing.xxSmall) {
+                        Text("Découvre les talents et clubs du basketball sénégalais.")
+                            .font(ETTypography.callout)
+                            .foregroundColor(ETColors.secondaryText)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, ETSpacing.standard)
+                    .padding(.top, ETSpacing.xxSmall)
+                    
                     // MARK: - Search Bar
                     ETSearchBar(
                         text: $viewModel.searchQuery,
-                        placeholder: "Rechercher joueur, club, ville..."
+                        placeholder: "Rechercher un joueur ou un club"
                     )
                     .padding(.horizontal, ETSpacing.standard)
                     .padding(.top, ETSpacing.xSmall)
@@ -102,8 +112,8 @@ public struct DiscoverView: View {
                                 (viewModel.selectedCategory == .all && viewModel.filteredPlayers.isEmpty && viewModel.filteredClubs.isEmpty) {
                                 ETEmptyState(
                                     icon: "magnifyingglass",
-                                    title: "Aucun résultat trouvé",
-                                    description: "Essayez de modifier vos filtres ou de chercher un autre nom ou une autre ville."
+                                    title: "Aucun résultat",
+                                    description: "Essaie avec un autre nom, une autre ville ou une autre position."
                                 )
                                 .padding(.top, ETSpacing.large)
                             }

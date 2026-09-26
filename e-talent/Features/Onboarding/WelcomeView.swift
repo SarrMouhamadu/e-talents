@@ -58,8 +58,8 @@ public struct WelcomeView: View {
                         )
                         featureRow(
                             icon: "eye.fill",
-                            title: "Fais-toi repérer",
-                            subtitle: "Sois visible des entraîneurs et recruteurs locaux et internationaux."
+                            title: "Fais-toi découvrir",
+                            subtitle: "Sois visible auprès de la communauté et des clubs du basketball sénégalais."
                         )
                     }
                     .padding(.horizontal, ETSpacing.standard)

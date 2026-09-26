@@ -28,7 +28,7 @@ public struct ClubProfileCreationView: View {
         "Coach Principal",
         "Directeur Sportif",
         "Président / Dirigeant",
-        "Recruteur / Scout",
+        "Recruteur",
         "Secrétaire Général"
     ]
     
@@ -48,7 +48,7 @@ public struct ClubProfileCreationView: View {
                             .font(ETTypography.largeTitle)
                             .foregroundColor(ETColors.pureWhite)
                         
-                        Text("Renseignez les détails de votre club pour publier vos détections et recruter les meilleurs talents.")
+                        Text("Renseignez les détails de votre club pour présenter votre équipe, publier vos détections et découvrir de nouveaux talents.")
                             .font(ETTypography.body)
                             .foregroundColor(ETColors.secondaryText)
                     }

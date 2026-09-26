@@ -92,7 +92,7 @@ public struct PlayerProfileView: View {
                                     Text("Disponible pour recrutement")
                                         .font(ETTypography.subheadlineBold)
                                         .foregroundColor(ETColors.pureWhite)
-                                    Text("Visible par les coachs et clubs détecteurs")
+                                    Text("Visible par les clubs et coachs")
                                         .font(ETTypography.caption)
                                         .foregroundColor(ETColors.secondaryText)
                                 }

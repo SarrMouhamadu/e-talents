@@ -4,7 +4,7 @@ public struct ETSearchBar: View {
     @Binding private var text: String
     private let placeholder: String
     
-    public init(text: Binding<String>, placeholder: String = "Rechercher un joueur, un club, une ville...") {
+    public init(text: Binding<String>, placeholder: String = "Rechercher un joueur ou un club") {
         self._text = text
         self.placeholder = placeholder
     }
