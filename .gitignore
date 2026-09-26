@@ -1,0 +1,14 @@
+# Xcode
+.DS_Store
+*/.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+*.xcuserdatad
+xcuserdata/
+*.sublime-project
+*.sublime-workspace
+.idea/
+*.swp
+*~

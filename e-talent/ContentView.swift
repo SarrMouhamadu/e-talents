@@ -1,25 +1,15 @@
 import SwiftUI
-import Playgrounds
 
-@main struct MyApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
-}
-
-struct ContentView: View {
-    var body: some View {
-        Text("E-Talent")
-            .padding()
+/// Vue racine de prévisualisation et passerelle vers MainTabView
+public struct ContentView: View {
+    public init() {}
+    
+    public var body: some View {
+        MainTabView()
+            .preferredColorScheme(.dark)
     }
 }
 
 #Preview {
     ContentView()
-}
-
-#Playground {
-    _ = 1 + 2
 }
